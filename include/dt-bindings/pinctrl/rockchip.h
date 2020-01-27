@@ -54,5 +54,7 @@
 #define RK_FUNC_2	2 /* deprecated */
 #define RK_FUNC_3	3 /* deprecated */
 #define RK_FUNC_4	4 /* deprecated */
+#define RK_FUNC_5	5 /* deprecated */
+#define RK_FUNC_6	6 /* deprecated */
 
 #endif
