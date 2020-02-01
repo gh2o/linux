@@ -72,6 +72,11 @@ static ssize_t force_mode_store(struct device *dev, struct device_attribute *att
 		return -EINVAL;
 	}
 
+	if (hsotg->wq_otg) {
+		queue_work(hsotg->wq_otg, &hsotg->wf_otg);
+		flush_workqueue(hsotg->wq_otg);
+	}
+
 	return size;
 }
 

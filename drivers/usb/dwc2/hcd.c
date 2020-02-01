@@ -3167,18 +3167,34 @@ static void dwc2_conn_id_status_change(struct work_struct *work)
 	struct dwc2_hsotg *hsotg = container_of(work, struct dwc2_hsotg,
 						wf_otg);
 	u32 count = 0;
-	u32 gotgctl;
+	u32 gotgctl, gusbcfg;
 	unsigned long flags;
+	bool device_mode;
 
 	dev_dbg(hsotg->dev, "%s()\n", __func__);
 
 	gotgctl = dwc2_readl(hsotg, GOTGCTL);
-	dev_dbg(hsotg->dev, "gotgctl=%0x\n", gotgctl);
-	dev_dbg(hsotg->dev, "gotgctl.b.conidsts=%d\n",
-		!!(gotgctl & GOTGCTL_CONID_B));
+	gusbcfg = dwc2_readl(hsotg, GUSBCFG);
+
+	switch (gusbcfg & (GUSBCFG_FORCEHOSTMODE | GUSBCFG_FORCEDEVMODE)) {
+	case GUSBCFG_FORCEHOSTMODE:
+		dev_dbg(hsotg->dev, "otg force host mode");
+		device_mode = false;
+		break;
+	case GUSBCFG_FORCEDEVMODE:
+		dev_dbg(hsotg->dev, "otg force dev mode");
+		device_mode = true;
+		break;
+	default:
+		dev_dbg(hsotg->dev, "gotgctl=%0x\n", gotgctl);
+		dev_dbg(hsotg->dev, "gotgctl.b.conidsts=%d\n",
+			!!(gotgctl & GOTGCTL_CONID_B));
+		device_mode = !!(gotgctl & GOTGCTL_CONID_B);
+		break;
+	}
 
 	/* B-Device connector (Device Mode) */
-	if (gotgctl & GOTGCTL_CONID_B) {
+	if (device_mode) {
 		dwc2_vbus_supply_exit(hsotg);
 		/* Wait for switch to device mode */
 		dev_dbg(hsotg->dev, "connId B\n");
@@ -3213,9 +3229,11 @@ static void dwc2_conn_id_status_change(struct work_struct *work)
 		spin_lock_irqsave(&hsotg->lock, flags);
 		dwc2_hsotg_core_init_disconnected(hsotg, false);
 		spin_unlock_irqrestore(&hsotg->lock, flags);
-		/* Enable ACG feature in device mode,if supported */
-		dwc2_enable_acg(hsotg);
-		dwc2_hsotg_core_connect(hsotg);
+		if (hsotg->enabled) {
+			/* Enable ACG feature in device mode,if supported */
+			dwc2_enable_acg(hsotg);
+			dwc2_hsotg_core_connect(hsotg);
+		}
 	} else {
 host:
 		/* A-Device connector (Host Mode) */
