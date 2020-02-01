@@ -411,6 +411,7 @@ static int rockchip_usb2phy_init(struct phy *phy)
 	if (rport->port_id == USB2PHY_PORT_OTG) {
 		if (rport->mode != USB_DR_MODE_HOST &&
 		    rport->mode != USB_DR_MODE_UNKNOWN) {
+#if 0	// rockpis does not support actual OTG
 			/* clear bvalid status and enable bvalid detect irq */
 			ret = property_enable(rphy->grf,
 					      &rport->port_cfg->bvalid_det_clr,
@@ -424,7 +425,6 @@ static int rockchip_usb2phy_init(struct phy *phy)
 			if (ret)
 				goto out;
 
-#if 0	// rockpis does not support actual OTG
 			schedule_delayed_work(&rport->otg_sm_work,
 					      OTG_SCHEDULE_DELAY * 3);
 #endif
@@ -433,6 +433,7 @@ static int rockchip_usb2phy_init(struct phy *phy)
 			dev_dbg(&rport->phy->dev, "mode %d\n", rport->mode);
 		}
 	} else if (rport->port_id == USB2PHY_PORT_HOST) {
+#if 0	// rockpis does not support actual OTG
 		/* clear linestate and enable linestate detect irq */
 		ret = property_enable(rphy->grf,
 				      &rport->port_cfg->ls_det_clr, true);
@@ -444,7 +445,6 @@ static int rockchip_usb2phy_init(struct phy *phy)
 		if (ret)
 			goto out;
 
-#if 0	// rockpis does not support actual OTG
 		schedule_delayed_work(&rport->sm_work, SCHEDULE_DELAY);
 #endif
 	}
@@ -951,6 +951,7 @@ static int rockchip_usb2phy_host_port_init(struct rockchip_usb2phy *rphy,
 	mutex_init(&rport->mutex);
 	INIT_DELAYED_WORK(&rport->sm_work, rockchip_usb2phy_sm_work);
 
+#if 0	// ignore phy irqs
 	rport->ls_irq = of_irq_get_byname(child_np, "linestate");
 	if (rport->ls_irq < 0) {
 		dev_err(rphy->dev, "no linestate irq provided\n");
@@ -965,6 +966,7 @@ static int rockchip_usb2phy_host_port_init(struct rockchip_usb2phy *rphy,
 		dev_err(rphy->dev, "failed to request linestate irq handle\n");
 		return ret;
 	}
+#endif
 
 	return 0;
 }
@@ -984,7 +986,7 @@ static int rockchip_usb2phy_otg_port_init(struct rockchip_usb2phy *rphy,
 					  struct rockchip_usb2phy_port *rport,
 					  struct device_node *child_np)
 {
-	int ret;
+	int ret = 0;
 
 	rport->port_id = USB2PHY_PORT_OTG;
 	rport->port_cfg = &rphy->phy_cfg->port_cfgs[USB2PHY_PORT_OTG];
@@ -1011,6 +1013,7 @@ static int rockchip_usb2phy_otg_port_init(struct rockchip_usb2phy *rphy,
 	INIT_DELAYED_WORK(&rport->chg_work, rockchip_chg_detect_work);
 	INIT_DELAYED_WORK(&rport->otg_sm_work, rockchip_usb2phy_otg_sm_work);
 
+#if 0	// ignore phy irqs
 	/*
 	 * Some SoCs use one interrupt with otg-id/otg-bvalid/linestate
 	 * interrupts muxed together, so probe the otg-mux interrupt first,
@@ -1058,6 +1061,7 @@ static int rockchip_usb2phy_otg_port_init(struct rockchip_usb2phy *rphy,
 		if (ret)
 			dev_err(rphy->dev, "register USB HOST notifier failed\n");
 	}
+#endif
 
 out:
 	return ret;
