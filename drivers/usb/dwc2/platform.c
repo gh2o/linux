@@ -56,6 +56,27 @@
 
 static const char dwc2_driver_name[] = "dwc2";
 
+static ssize_t force_mode_store(struct device *dev, struct device_attribute *attr,
+		const char *buf, size_t size)
+{
+	struct dwc2_hsotg *hsotg = dev_get_drvdata(dev);
+
+	if (size == 0 || buf[0] == '\0') {
+		dwc2_clear_force_mode(hsotg);
+	} else if (sysfs_streq(buf, "host")) {
+		dwc2_force_mode(hsotg, true);
+	} else if (sysfs_streq(buf, "peripheral")) {
+		dwc2_force_mode(hsotg, false);
+	} else {
+		dev_err(dev, "force_mode takes host/peripheral/<empty>\n");
+		return -EINVAL;
+	}
+
+	return size;
+}
+
+static DEVICE_ATTR_WO(force_mode);
+
 /*
  * Check the dr_mode against the module configuration and hardware
  * capabilities.
@@ -307,6 +328,8 @@ static int dwc2_driver_remove(struct platform_device *dev)
 	struct dwc2_hsotg *hsotg = platform_get_drvdata(dev);
 
 	dwc2_debugfs_exit(hsotg);
+	device_remove_file(&dev->dev, &dev_attr_force_mode);
+
 	if (hsotg->hcd_enabled)
 		dwc2_hcd_remove(hsotg);
 	if (hsotg->gadget_enabled)
@@ -501,6 +524,7 @@ static int dwc2_driver_probe(struct platform_device *dev)
 	platform_set_drvdata(dev, hsotg);
 	hsotg->hibernated = 0;
 
+	device_create_file(&dev->dev, &dev_attr_force_mode);
 	dwc2_debugfs_init(hsotg);
 
 	/* Gadget code manages lowlevel hw on its own */

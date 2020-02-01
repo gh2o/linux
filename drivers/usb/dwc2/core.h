@@ -1297,6 +1297,8 @@ void dwc2_init_fs_ls_pclk_sel(struct dwc2_hsotg *hsotg);
 int dwc2_phy_init(struct dwc2_hsotg *hsotg, bool select_phy);
 
 void dwc2_force_mode(struct dwc2_hsotg *hsotg, bool host);
+void dwc2_clear_force_mode(struct dwc2_hsotg *hsotg);
+
 void dwc2_force_dr_mode(struct dwc2_hsotg *hsotg);
 
 bool dwc2_is_controller_alive(struct dwc2_hsotg *hsotg);

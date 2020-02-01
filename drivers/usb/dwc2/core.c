@@ -618,7 +618,7 @@ void dwc2_force_mode(struct dwc2_hsotg *hsotg, bool host)
  *
  * @hsotg: Programming view of DWC_otg controller
  */
-static void dwc2_clear_force_mode(struct dwc2_hsotg *hsotg)
+void dwc2_clear_force_mode(struct dwc2_hsotg *hsotg)
 {
 	u32 gusbcfg;
 
