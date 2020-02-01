@@ -424,8 +424,10 @@ static int rockchip_usb2phy_init(struct phy *phy)
 			if (ret)
 				goto out;
 
+#if 0	// rockpis does not support actual OTG
 			schedule_delayed_work(&rport->otg_sm_work,
 					      OTG_SCHEDULE_DELAY * 3);
+#endif
 		} else {
 			/* If OTG works in host only mode, do nothing. */
 			dev_dbg(&rport->phy->dev, "mode %d\n", rport->mode);
@@ -442,7 +444,9 @@ static int rockchip_usb2phy_init(struct phy *phy)
 		if (ret)
 			goto out;
 
+#if 0	// rockpis does not support actual OTG
 		schedule_delayed_work(&rport->sm_work, SCHEDULE_DELAY);
+#endif
 	}
 
 out:
