@@ -146,6 +146,7 @@
 		regulator-name = "vcc_otg_vbus";
 	};
 
+#if 0
 	wireless-bluetooth {
 		compatible = "bluetooth-platdata";
 		uart_rts_gpios = <&gpio4 RK_PA7 GPIO_ACTIVE_LOW>;
@@ -169,6 +170,7 @@
 		WIFI,host_wake_irq = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
+#endif
 
 	gpio-leds {
 		compatible = "gpio-leds";
@@ -357,6 +359,12 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart4_xfer &uart4_cts &uart4_rts>;
 	status = "okay";
+
+	bluetooth {
+	    compatible = "realtek,rtl8723ds-bt";
+	    enable-gpio = <&gpio4 RK_PB3 GPIO_ACTIVE_HIGH>;
+	    device-wake-gpio = <&gpio4 RK_PB2 GPIO_ACTIVE_HIGH>;
+	};
 };
 
 &usb20_otg {
