@@ -191,6 +191,22 @@
 		};
 	};
 
+	gpio-keys {
+		compatible = "gpio-keys";
+		status = "okay";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&pair_button>;
+
+		pair-button {
+			label = "Pair Button";
+			gpios = <&gpio3 RK_PB1 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_SPACE>;
+			debounce-interval = <100>;
+			wakeup-source;
+		};
+	};
+
 	acodec_sound: acodec-sound {
 		compatible = "rockchip,multicodecs-card";
 		rockchip,card-name = "rockchip,rk3308-acodec";
@@ -271,6 +287,9 @@
 	buttons {
 		mic_mute: mic-mute {
 			rockchip,pins = <0 RK_PC0 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+		pair_button: pair-button {
+			rockchip,pins = <3 RK_PB1 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 	usb {
