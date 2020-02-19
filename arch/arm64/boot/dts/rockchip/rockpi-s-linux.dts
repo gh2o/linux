@@ -202,7 +202,7 @@
 			label = "Pair Button";
 			gpios = <&gpio3 RK_PB1 GPIO_ACTIVE_LOW>;
 			linux,code = <KEY_SPACE>;
-			debounce-interval = <100>;
+			debounce-interval = <40>;
 			wakeup-source;
 		};
 	};
