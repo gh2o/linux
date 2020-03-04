@@ -61,7 +61,7 @@ static ssize_t force_mode_store(struct device *dev, struct device_attribute *att
 {
 	struct dwc2_hsotg *hsotg = dev_get_drvdata(dev);
 
-	if (size == 0 || buf[0] == '\0') {
+	if (sysfs_streq(buf, "")) {
 		dwc2_clear_force_mode(hsotg);
 	} else if (sysfs_streq(buf, "host")) {
 		dwc2_force_mode(hsotg, true);
@@ -80,7 +80,23 @@ static ssize_t force_mode_store(struct device *dev, struct device_attribute *att
 	return size;
 }
 
-static DEVICE_ATTR_WO(force_mode);
+static ssize_t force_mode_show(struct device *dev, struct device_attribute *attr,
+		char *buf)
+{
+	struct dwc2_hsotg *hsotg = dev_get_drvdata(dev);
+	u32 gusbcfg = dwc2_readl(hsotg, GUSBCFG);
+
+	switch (gusbcfg & (GUSBCFG_FORCEHOSTMODE | GUSBCFG_FORCEDEVMODE)) {
+	case GUSBCFG_FORCEHOSTMODE:
+		return scnprintf(buf, PAGE_SIZE, "host\n");
+	case GUSBCFG_FORCEDEVMODE:
+		return scnprintf(buf, PAGE_SIZE, "peripheral\n");
+	default:
+		return 0;
+	}
+}
+
+static DEVICE_ATTR_RW(force_mode);
 
 /*
  * Check the dr_mode against the module configuration and hardware
